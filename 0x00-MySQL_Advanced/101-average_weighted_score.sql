@@ -9,9 +9,8 @@ BEGIN
         JOIN corrections as C ON U.id=C.user_id 
         JOIN projects AS P ON C.project_id=P.id 
         GROUP BY U.id)
-    AS WA
-    SET U.average_score = WA.w_avg 
-    WHERE U.id=WA.id;
+    AS WA ON U.id=WA.id
+    SET U.average_score = WA.w_avg;
 END
 $$
 DELIMITER ;
