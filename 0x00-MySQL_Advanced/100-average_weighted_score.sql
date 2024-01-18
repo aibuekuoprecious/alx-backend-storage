@@ -10,8 +10,8 @@ BEGIN
                         FROM users AS U 
                         JOIN corrections as C ON U.id=C.user_id 
                         JOIN projects AS P ON C.project_id=P.id 
-                        WHERE U.id=user_id);
-    UPDATE users SET average_score = w_avg_score WHERE id=user_id;
+    );
+    UPDATE users SET average_score = w_avg_score;
 END
 $$
 DELIMITER ;
