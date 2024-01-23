@@ -16,30 +16,17 @@ if __name__ == "__main__":
         count = nginx_collection.count_documents({"method": method})
         print(f'\tmethod {method}: {count}')
 
-    log_status = nginx_collection.count_documents(
+    status_check = nginx_collection.count_documents(
         {"method": "GET", "path": "/status"}
     )
-
     print(f'{status_check} status check')
 
+    # Top 10 IPs
+    print('IPs:')
     top_ips = nginx_collection.aggregate([
-        {"$group":
-            {
-                "_id": "$ip",
-                "count": {"$sum": 1}
-            }
-         },
+        {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
         {"$sort": {"count": -1}},
-        {"$limit": 10},
-        {"$project": {
-            "_id": 0,
-            "ip": "$_id",
-            "count": 1
-        }}
+        {"$limit": 10}
     ])
-
-    print("IPs:")
-    for top_ip in top_ips:
-        ip = top_ip.get("ip")
-        count = top_ip.get("count")
-        print(f'\t{ip}: {count}')
+    for ip in top_ips:
+        print(f'\t{ip["_id"]}: {ip["count"]}')
