@@ -12,13 +12,13 @@ from functools import wraps
 
 def count_calls(method: Callable) -> Callable:
     '''
-        Counts the number of times a method is called.
+        Decorator that counts the number of times a method is called.
     '''
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         '''
-            Wrapper function.
+            Wrapper function that increments the call count and calls the method.
         '''
         key = method.__qualname__
         self._redis.incr(key)
@@ -27,8 +27,8 @@ def count_calls(method: Callable) -> Callable:
 
 
 def call_history(method: Callable) -> Callable:
-    """ Decorator to store the history of inputs and
-    outputs for a particular function.
+    """ 
+    Decorator that stores the history of inputs and outputs for a particular function.
     """
     key = method.__qualname__
     inputs = key + ":inputs"
@@ -36,7 +36,9 @@ def call_history(method: Callable) -> Callable:
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):  # sourcery skip: avoid-builtin-shadow
-        """ Wrapper for decorator functionality """
+        """ 
+        Wrapper function that stores the inputs and outputs and calls the method.
+        """
         self._redis.rpush(inputs, str(args))
         data = method(self, *args, **kwargs)
         self._redis.rpush(outputs, str(data))
@@ -67,11 +69,11 @@ def replay(method: Callable) -> None:
 
 class Cache:
     '''
-        Cache class.
+    Cache class that interacts with Redis.
     '''
     def __init__(self):
         '''
-            Initialize the cache.
+        Initialize the cache by creating a Redis connection and flushing the database.
         '''
         self._redis = redis.Redis()
         self._redis.flushdb()
@@ -80,16 +82,17 @@ class Cache:
     @call_history
     def store(self, data: Union[str, bytes, int, float]) -> str:
         '''
-            Store data in the cache.
+        Store data in the cache with a random key and return the key.
         '''
-        randomKey = str(uuid4())
-        self._redis.set(randomKey, data)
-        return randomKey
+        random_key = str(uuid4())
+        self._redis.set(random_key, data)
+        return random_key
 
     def get(self, key: str,
             fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         '''
-            Get data from the cache.
+        Get data from the cache using the specified key.
+        If a transformation function is provided, apply it to the retrieved value.
         '''
         value = self._redis.get(key)
         if fn:
@@ -98,14 +101,15 @@ class Cache:
 
     def get_str(self, key: str) -> str:
         '''
-            Get a string from the cache.
+        Get a string value from the cache using the specified key.
         '''
         value = self._redis.get(key)
         return value.decode('utf-8')
 
     def get_int(self, key: str) -> int:
         '''
-            Get an int from the cache.
+        Get an integer value from the cache using the specified key.
+        If the value cannot be converted to an integer, return 0.
         '''
         value = self._redis.get(key)
         try:
