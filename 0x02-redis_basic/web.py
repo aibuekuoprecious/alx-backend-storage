@@ -12,7 +12,7 @@ redis_client = redis.Redis()
 def count_requests(method: Callable) -> Callable:
     """ Decorator for counting requests """
     @wraps(method)
-    def wrapper(url):  # sourcery skip: use-named-expression
+    def wrapper(url):
         """ Wrapper function for counting requests """
         redis_client.incr(f"count:{url}")
         cached_html = redis_client.get(f"cached:{url}")
